@@ -16,8 +16,9 @@ pub(crate) fn train<Oracle, InputGiver, ModelManipulator>(
 	input_giver: InputGiver,
 	model_manipulator: ModelManipulator,
 	model: &Model,
+	prev_best_val: f64,
 	consts: (usize, usize),
-) -> Result<()>
+) -> Result<(Model, f64)>
 where
 	Oracle: Fn(&[i64], &[i64]) -> f64,
 	InputGiver: Fn() -> Vec<Vec<i64>>,
@@ -40,7 +41,7 @@ where
 					value.map(|value| sum + value)
 				})? / (inputs.len() as f64);
 
-			println!("{}", value);
+			//println!("{}", value);
 
 			Ok((model, value))
 		})
@@ -51,7 +52,18 @@ where
 
 	println!("{:?}: {:?}", best_val, best_model);
 
-	Ok(())
+	if best_val > prev_best_val {
+		train(
+			oracle,
+			input_giver,
+			model_manipulator,
+			&best_model,
+			best_val,
+			consts,
+		)
+	} else {
+		Ok((best_model, best_val))
+	}
 }
 
 pub(crate) fn run(model: &Model, inputs: &[i64], consts: (usize, usize)) -> Result<Vec<i64>> {

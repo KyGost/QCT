@@ -27,7 +27,6 @@ fn main() -> Result<()> {
 	};
 
 	let sum_evaluator = |input: &[i64], output: &[i64]| {
-		println!("{:?} {:?}", input, output);
 		// Input should be two numbers, output should be their addition
 		let sum = *input.get(0).unwrap_or(&0) + *input.get(1).unwrap_or(&0);
 		let result = *output.get(0).unwrap_or(&0);
@@ -45,8 +44,10 @@ fn main() -> Result<()> {
 		input_supplier,
 		default_model_manipulator,
 		&model,
+		0.0,
 		(SHOTS, ACCURACY),
-	)
+	)?;
+	Ok(())
 }
 
 fn default_model_manipulator(model: &Model) -> Vec<Model> {
