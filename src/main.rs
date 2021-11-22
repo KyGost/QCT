@@ -97,15 +97,37 @@ fn rand_gate(model: &Model) -> Gate {
 			fastrand::usize(..model.qbits),
 		),
 		0 => Gate::X(fastrand::usize(..model.qbits)),
-		1 => Gate::CX(
-			fastrand::usize(..model.qbits),
-			fastrand::usize(..model.qbits),
-		),
-		2 => Gate::CCX(
-			fastrand::usize(..model.qbits),
-			fastrand::usize(..model.qbits),
-			fastrand::usize(..model.qbits),
-		),
+		1 => {
+			if model.qbits < 2 {
+				return Gate::NoOP();
+			}
+			let q1 = unused_qbit(model.qbits, &[]);
+			let q2 = unused_qbit(model.qbits, &[q1]);
+			Gate::CX(q1, q2)
+		}
+		2 => {
+			if model.qbits < 3 {
+				return Gate::NoOP();
+			}
+			let q1 = unused_qbit(model.qbits, &[]);
+			let q2 = unused_qbit(model.qbits, &[q1]);
+			let q3 = unused_qbit(model.qbits, &[q1, q2]);
+			Gate::CCX(q1, q2, q3)
+		}
 		_ => panic!(),
+	}
+}
+
+fn unused_qbit(qbits: usize, used_qbits: &[usize]) -> usize {
+	let qbit = fastrand::usize(..qbits);
+	if !used_qbits.is_empty()
+		&& used_qbits
+			.iter()
+			.find(|used_qbit| used_qbit == &&qbit)
+			.is_some()
+	{
+		unused_qbit(qbits, used_qbits)
+	} else {
+		qbit
 	}
 }

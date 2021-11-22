@@ -14,6 +14,7 @@ pub struct Model {
 
 #[derive(Debug, Clone)]
 pub enum Gate {
+	NoOP(),
 	Measure(usize, usize),
 	U(f64, f64, f64, usize),
 	X(usize),
@@ -24,6 +25,7 @@ impl Gate {
 	pub fn run(&self, circuit: &mut Circuit) -> Result<()> {
 		use Gate::*;
 		match self {
+			NoOP() => Ok(()),
 			Measure(q, c) => circuit.measure(*q, *c),
 			U(p1, p2, p3, q) => circuit.u3(*p1, *p2, *p3, *q),
 			X(q) => circuit.x(*q),

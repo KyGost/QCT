@@ -9,6 +9,7 @@ use q1tsim::{
 	circuit::Circuit,
 	error::Result,
 };
+use std::panic::catch_unwind;
 
 pub(crate) fn train<Oracle, InputGiver, ModelManipulator>(
 	oracle: Oracle,
@@ -31,7 +32,8 @@ where
 			let value = inputs
 				.iter()
 				.map(|input| {
-					let output = run(&model, input, consts)?;
+					let output = catch_unwind(|| run(&model, input, consts))
+						.unwrap_or_else(|err| panic!("{:?}\n{:?}", err, model))?;
 					Ok(oracle(input, &output))
 				})
 				.try_fold(0.0, |sum, value: Result<f64>| {
