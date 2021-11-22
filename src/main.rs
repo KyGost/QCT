@@ -19,14 +19,45 @@ mod train;
 mod util;
 
 const SHOTS: usize = 10000;
-const ACCURACY: usize = 20;
+const ACCURACY: usize = 100;
 
 // TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
+	make_many_models();
+	Ok(())
+}
+
+fn test_model() -> Result<()> {
+	let model = Model {
+		gates: vec![
+			Gate::U(
+				0.14755214188660948,
+				1.0541597080510559,
+				0.3975370955526963,
+				0,
+			),
+			Gate::CX(1, 2),
+			Gate::CX(0, 2),
+			Gate::CCX(0, 1, 2),
+			Gate::X(1),
+			Gate::CCX(0, 2, 1),
+		],
+		qbits: 3,
+		cbits: 1,
+		measure_at_end: vec![(2, 0)],
+	};
+	let results = run(&model, &[6, 9], (SHOTS, ACCURACY));
+	println!("{:?}", results);
+	Ok(())
+}
+
+fn make_many_models() -> Result<()> {
 	let mut iters = 0;
-	while iters < 100 {
+	while iters < 1000 {
 		iters += 1;
-		println!("Working on model {}", iters);
+		if iters % 50 == 0 {
+			println!("Working on model {}", iters);
+		}
 		make_model()?;
 	}
 	Ok(())
@@ -52,15 +83,14 @@ fn make_model() -> Result<()> {
 	};
 
 	let input_supplier = || {
-		vec![
-			vec![5, 4],
-			vec![2, 3],
-			vec![1, 9],
-			vec![8, 7],
-			vec![3, 7],
-			vec![3, 10],
-			vec![0, 2],
-		]
+		let mut inputs = vec![];
+		for _ in 0..10 {
+			inputs.push(vec![
+				fastrand::usize(0..(ACCURACY / 2)) as i64,
+				fastrand::usize(0..(ACCURACY / 2)) as i64,
+			])
+		}
+		inputs
 	};
 
 	let (model, val) = train(
@@ -71,7 +101,7 @@ fn make_model() -> Result<()> {
 		(0.0, 0.5),
 		(SHOTS, ACCURACY),
 	)?;
-	if val > 0.4 {
+	if val > 0.65 {
 		println!("Produced {} model: {:?}", val, model);
 	}
 	Ok(())
@@ -80,27 +110,15 @@ fn make_model() -> Result<()> {
 fn default_model_manipulator(model: &Model) -> Vec<Model> {
 	vec![
 		model.clone(),
+		model.clone(),
+		model.clone(),
 		action_upon_model(model.clone()),
-		action_upon_model(model.clone()),
-		action_upon_model(model.clone()),
-		action_upon_model(model.clone()),
-		action_upon_model(action_upon_model(model.clone())),
 		action_upon_model(action_upon_model(model.clone())),
 		action_upon_model(action_upon_model(model.clone())),
 		action_upon_model(action_upon_model(model.clone())),
 		action_upon_model(action_upon_model(action_upon_model(model.clone()))),
-		action_upon_model(action_upon_model(action_upon_model(model.clone()))),
 		action_upon_model(action_upon_model(action_upon_model(action_upon_model(
 			model.clone(),
-		)))),
-		action_upon_model(action_upon_model(action_upon_model(action_upon_model(
-			model.clone(),
-		)))),
-		action_upon_model(action_upon_model(action_upon_model(action_upon_model(
-			action_upon_model(model.clone()),
-		)))),
-		action_upon_model(action_upon_model(action_upon_model(action_upon_model(
-			action_upon_model(model.clone()),
 		)))),
 	]
 }

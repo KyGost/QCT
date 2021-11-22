@@ -102,7 +102,7 @@ pub(crate) fn run(model: &Model, inputs: &[i64], consts: (usize, usize)) -> Resu
 fn valuate(model: &Model, oracle_val: f64) -> f64 {
 	// TODO: Cleanup and justify
 	let oracle_val = oracle_val.powf(4.0);
-	let qbit_val = (model.qbits as f64 / 16.0).powf(4.0);
-	let gate_val = (model.gates.len() as f64 / 64.0).powf(4.0);
+	let qbit_val = (model.qbits as f64 / 12.0).powf(4.0);
+	let gate_val = (model.gates.len() as f64 / 128.0).powf(4.0);
 	oracle_val - (qbit_val + gate_val)
 }
