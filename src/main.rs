@@ -19,7 +19,7 @@ mod train;
 mod util;
 
 const SHOTS: usize = 10000;
-const ACCURACY: usize = 100;
+const ACCURACY: usize = 20;
 fn main() -> Result<()> {
 	loop {
 		println!("New model");
@@ -47,7 +47,17 @@ fn make_model() -> Result<()> {
 		}
 	};
 
-	let input_supplier = || vec![vec![5, 86], vec![74, 63], vec![11, 2], vec![45, 7]];
+	let input_supplier = || {
+		vec![
+			vec![5, 4],
+			vec![2, 3],
+			vec![1, 9],
+			vec![8, 7],
+			vec![3, 7],
+			vec![3, 10],
+			vec![0, 2],
+		]
+	};
 
 	train(
 		sum_evaluator,
