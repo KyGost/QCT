@@ -9,7 +9,11 @@ use q1tsim::{
 	circuit::Circuit,
 	error::Result,
 };
-use std::panic::catch_unwind;
+use rayon::prelude::*;
+use std::{
+	marker::Sync,
+	panic::catch_unwind,
+};
 
 pub(crate) fn train<Oracle, InputGiver, ModelManipulator>(
 	oracle: Oracle,
@@ -20,7 +24,7 @@ pub(crate) fn train<Oracle, InputGiver, ModelManipulator>(
 	consts: (usize, usize),
 ) -> Result<(Model, f64)>
 where
-	Oracle: Fn(&[i64], &[i64]) -> f64,
+	Oracle: Fn(&[i64], &[i64]) -> f64 + Sync,
 	InputGiver: Fn() -> Vec<Vec<i64>>,
 	ModelManipulator: Fn(&Model) -> Vec<Model>,
 {
@@ -30,7 +34,7 @@ where
 	let inputs = input_giver();
 
 	let (best_model, best_val) = models
-		.into_iter()
+		.into_par_iter()
 		.map(|model| {
 			let oracle_val = inputs
 				.iter()

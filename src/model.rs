@@ -27,7 +27,7 @@ impl Gate {
 		match self {
 			NoOP() => Ok(()),
 			Measure(q, c) => circuit.measure(*q, *c),
-			U(p1, p2, p3, q) => circuit.u3(*p1, *p2, *p3, *q),
+			U(p1, p2, p3, q) => Ok(()), //circuit.u3(*p1, *p2, *p3, *q),
 			X(q) => circuit.x(*q),
 			CX(q1, q2) => circuit.cx(*q1, *q2),
 			CCX(q1, q2, q3) => circuit.add_gate(gates::CCX::new(), &[*q1, *q2, *q3]),
