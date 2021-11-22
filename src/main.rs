@@ -13,8 +13,8 @@ mod oracles;
 mod train;
 mod util;
 
-const SHOTS: usize = 2000;
-const ACCURACY: usize = 200;
+const SHOTS: usize = 1000;
+const ACCURACY: usize = 100;
 
 // TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
@@ -73,8 +73,8 @@ fn make_model() -> Result<()> {
 		let mut inputs = vec![];
 		for _ in 0..10 {
 			inputs.push(vec![
-				fastrand::usize(0..(ACCURACY / 2)) as i64,
-				fastrand::usize(0..(ACCURACY / 2)) as i64,
+				fastrand::usize(0..((ACCURACY as f64).powf(0.5)) as usize) as i64,
+				fastrand::usize(0..((ACCURACY as f64).powf(0.5)) as usize) as i64,
 			])
 		}
 		inputs
@@ -88,8 +88,8 @@ fn make_model() -> Result<()> {
 		(0.0, 0.5),
 		(SHOTS, ACCURACY),
 	)?;
-	if val > 0.7 {
-		println!("Produced {} model: {:?}", val, model);
+	if val > 0.5 {
+		println!("Produced {} model: {:?}", val, model); // TODO: Give a list of best few
 	}
 	Ok(())
 }
