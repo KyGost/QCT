@@ -37,15 +37,16 @@ where
 		.into_par_iter()
 		.map(|model| {
 			let oracle_val = inputs
-				.iter()
+				.par_iter()
 				.map(|input| {
 					let output = catch_unwind(|| run(&model, input, consts))
 						.unwrap_or_else(|err| panic!("{:?}\n{:?}", err, model))?;
 					Ok(oracle(input, &output))
 				})
-				.try_fold(0.0, |sum, value: Result<f64>| {
-					value.map(|value| sum + value)
-				})? / (inputs.len() as f64);
+				.collect::<Result<Vec<f64>>>()?
+				.into_iter()
+				.fold(0.0, |sum, value| sum + value)
+				/ (inputs.len() as f64);
 
 			let val = valuate(&model, oracle_val); // Value consists of oracle score weighted against number of qubits and number of gates
 			Ok((model, val))
