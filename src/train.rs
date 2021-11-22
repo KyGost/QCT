@@ -60,7 +60,9 @@ where
 
 	let change = best_val - prev_best;
 	let rolling_avg = (rolling_avg + change) / 2.0;
-	if rolling_avg > -0.01 && best_val < 0.8 {
+	if rolling_avg < 0.0 || best_val > 0.7 {
+		Ok((best_model, best_val))
+	} else {
 		train(
 			oracle,
 			input_giver,
@@ -69,8 +71,6 @@ where
 			(best_val, rolling_avg),
 			consts,
 		)
-	} else {
-		Ok((best_model, best_val))
 	}
 }
 

@@ -5,57 +5,55 @@ pub(crate) use crate::{
 	util::*,
 };
 use q1tsim::error::Result;
-use std::{
-	cmp::{
-		max,
-		min,
-	},
-	f64::consts::PI,
-};
+use std::f64::consts::PI;
 
 mod model;
 mod model_manip;
+mod oracles;
 mod train;
 mod util;
 
-const SHOTS: usize = 10000;
-const ACCURACY: usize = 100;
+const SHOTS: usize = 2000;
+const ACCURACY: usize = 200;
 
 // TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
-	make_many_models();
+	make_many_models(10000);
 	Ok(())
 }
 
 fn test_model() -> Result<()> {
+	use Gate::*;
 	let model = Model {
 		gates: vec![
-			Gate::U(
-				0.14755214188660948,
-				1.0541597080510559,
-				0.3975370955526963,
+			CX(0, 1),
+			U(
+				0.22703964107094474,
+				1.9715433431995129,
+				0.45084032752183745,
 				0,
 			),
-			Gate::CX(1, 2),
-			Gate::CX(0, 2),
-			Gate::CCX(0, 1, 2),
-			Gate::X(1),
-			Gate::CCX(0, 2, 1),
+			CX(0, 2),
+			CX(1, 2),
+			CCX(1, 0, 2),
+			X(1),
+			CCX(1, 2, 0),
+			CCX(1, 0, 2),
 		],
 		qbits: 3,
 		cbits: 1,
 		measure_at_end: vec![(2, 0)],
 	};
-	let results = run(&model, &[6, 9], (SHOTS, ACCURACY));
+	let results = run(&model, &[20, 74], (SHOTS * 100, ACCURACY));
 	println!("{:?}", results);
 	Ok(())
 }
 
-fn make_many_models() -> Result<()> {
+fn make_many_models(number: i64) -> Result<()> {
 	let mut iters = 0;
-	while iters < 1000 {
+	while iters < number {
 		iters += 1;
-		if iters % 50 == 0 {
+		if iters % (number / 20) == 0 {
 			println!("Working on model {}", iters);
 		}
 		make_model()?;
@@ -71,17 +69,6 @@ fn make_model() -> Result<()> {
 		measure_at_end: vec![(2, 0)],
 	};
 
-	let sum_evaluator = |input: &[i64], output: &[i64]| {
-		// Input should be two numbers, output should be their addition
-		let sum = *input.get(0).unwrap_or(&0) + *input.get(1).unwrap_or(&0);
-		let result = *output.get(0).unwrap_or(&0);
-		if result == 0 {
-			if sum == 0 { 1.0 } else { 0.0 }
-		} else {
-			min(sum, result) as f64 / max(sum, result) as f64
-		}
-	};
-
 	let input_supplier = || {
 		let mut inputs = vec![];
 		for _ in 0..10 {
@@ -94,14 +81,14 @@ fn make_model() -> Result<()> {
 	};
 
 	let (model, val) = train(
-		sum_evaluator,
+		oracles::multiply_evaluator,
 		input_supplier,
 		default_model_manipulator,
 		&model,
 		(0.0, 0.5),
 		(SHOTS, ACCURACY),
 	)?;
-	if val > 0.65 {
+	if val > 0.7 {
 		println!("Produced {} model: {:?}", val, model);
 	}
 	Ok(())

@@ -18,3 +18,44 @@ Using inconsistent inputs:
 ---
 
 Produced 0.8959803084421218 model: Model { gates: [U(0.14755214188660948, 1.0541597080510559, 0.3975370955526963, 0), CX(1, 2), CX(0, 2), CCX(0, 1, 2), X(1), CCX(0, 2, 1)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+
+
+Accuracy 100:
+---
+Produced 0.8456858262269672 model: Model { gates: [U(0.06447353241494744, 1.378554487822666, 0.6967891503772778, 0), CCX(0, 1, 2), CX(1, 0), CCX(0, 1, 2), CX(0, 2), CCX(1, 0, 2), X(3)], qbits: 4, cbits: 1, measure_at_end: [(2, 0)] }
+
+
+Accuracy 200:
+---
+Produced 0.8288924202815966 model: Model { gates: [X(2), X(1), CCX(1, 2, 0), CCX(1, 0, 2), CCX(1, 2, 0), CCX(2, 0, 1)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8003769272849219 model: Model { gates: [CX(1, 2), X(1), CCX(1, 2, 0), CCX(1, 0, 2), X(1)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8022475819479282 model: Model { gates: [U(2.8539887121048997, 1.5649777944298158, 0.9574550777731582, 2), X(0), CX(0, 1), CCX(0, 1, 2), U(2.093680737282108, 0.18912057127776621, 1.7801272466797071, 0)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8558319439872769 model: Model { gates: [CCX(0, 1, 2), CX(0, 1), CX(1, 2)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8134266736302136 model: Model { gates: [CCX(1, 0, 2), CX(0, 2), CX(1, 2)], qbits: 4, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8118267482698317 model: Model { gates: [X(1), X(2), CX(1, 0), CCX(0, 1, 2), CCX(1, 2, 0)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8035469183512494 model: Model { gates: [CX(1, 2), X(1), U(0.383305099217139, 1.4560301309842045, 2.3979381143290652, 2), CCX(0, 1, 2), X(1)], qbits: 4, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8388615549780388 model: Model { gates: [X(1), X(0), X(2), CCX(1, 0, 2)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8607347072140253 model: Model { gates: [X(0), CCX(0, 1, 2), X(2), CX(0, 2), CX(1, 0)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8739837553202086 model: Model { gates: [X(2), CX(2, 0), CCX(0, 1, 2), CX(0, 2), U(0.24236839280946593, 1.5840573107583609, 1.9423972977063106, 2), CX(3, 0)], qbits: 4, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8127668773770143 model: Model { gates: [CX(1, 2), CX(0, 2), CCX(1, 0, 2)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+
+Change 0.8 handicap to 0.825:
+---
+Produced 0.844233258884945 model: Model { gates: [CX(0, 2), U(2.010765557479478, 0.7636190540704303, 1.5044152051803323, 3), X(0), U(0.25738795450690705, 1.539551195743891, 1.1405969670166884, 1), CCX(0, 1, 2), CX(0, 4), CCX(2, 0, 3), CCX(0, 2, 3), CX(2, 3)], qbits: 5, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.8642494482460971 model: Model { gates: [CX(0, 2), CX(1, 2), CCX(1, 0, 2)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Produced 0.827310277007368 model: Model { gates: [CX(0, 2), CX(1, 2), CCX(1, 0, 2)], qbits: 4, cbits: 1, measure_at_end: [(2, 0)] }
+
+misc
+---
+Produced 0.8757962435542603 model: Model { gates: [CX(0, 1), U(0.22703964107094474, 1.9715433431995129, 0.45084032752183745, 0), U(3.0449161983904607, 1.000934262984294, 2.008627530838797, 1), CX(1, 2), CCX(1, 0, 2), X(2), CCX(0, 2, 3), CCX(1, 2, 0)], qbits: 4, cbits: 1, measure_at_end: [(2, 0)] }
+
+
+
+Using pow 8 for valuation + refining prev
+---
+No real changes:
+Produced 0.8852369297850111 model: Model { gates: [CX(0, 1), U(0.22703964107094474, 1.9715433431995129, 0.45084032752183745, 0), U(3.0449161983904607, 1.000934262984294, 2.008627530838797, 1), CX(1, 2), CCX(1, 0, 2), X(2), CCX(1, 2, 0)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+No real changes:
+Produced 0.8920812927473191 model: Model { gates: [CX(0, 1), U(0.22703964107094474, 1.9715433431995129, 0.45084032752183745, 0), U(3.0449161983904607, 1.000934262984294, 2.008627530838797, 1), CX(1, 2), CCX(1, 0, 2), X(2), CCX(1, 2, 0), CX(2, 1)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
+Gives good results, not sure if it is much better than the other but results are very good.
+Produced 0.8794135648106521 model: Model { gates: [CX(0, 1), U(0.22703964107094474, 1.9715433431995129, 0.45084032752183745, 0), CX(0, 2), CX(1, 2), CCX(1, 0, 2), X(1), CCX(1, 2, 0), CCX(1, 0, 2)], qbits: 3, cbits: 1, measure_at_end: [(2, 0)] }
