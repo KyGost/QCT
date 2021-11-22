@@ -20,9 +20,13 @@ mod util;
 
 const SHOTS: usize = 10000;
 const ACCURACY: usize = 20;
+
+// TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
-	loop {
-		println!("New model");
+	let mut iters = 0;
+	while iters < 100 {
+		iters += 1;
+		println!("Working on model {}", iters);
 		make_model()?;
 	}
 	Ok(())
@@ -59,7 +63,7 @@ fn make_model() -> Result<()> {
 		]
 	};
 
-	train(
+	let (model, val) = train(
 		sum_evaluator,
 		input_supplier,
 		default_model_manipulator,
@@ -67,6 +71,9 @@ fn make_model() -> Result<()> {
 		(0.0, 0.5),
 		(SHOTS, ACCURACY),
 	)?;
+	if val > 0.4 {
+		println!("Produced {} model: {:?}", val, model);
+	}
 	Ok(())
 }
 

@@ -55,11 +55,11 @@ where
 		.max_by_key(|(model, value)| (value * 1000.0) as i64)
 		.unwrap_or((model.clone(), 0.0));
 
-	println!("{:?}: {:?}", best_val, best_model);
+	//println!("{:?}: {:?}", best_val, best_model);
 
 	let change = best_val - prev_best;
 	let rolling_avg = (rolling_avg + change) / 2.0;
-	if rolling_avg > 0.0 {
+	if rolling_avg > -0.01 && best_val < 0.8 {
 		train(
 			oracle,
 			input_giver,
@@ -101,7 +101,7 @@ pub(crate) fn run(model: &Model, inputs: &[i64], consts: (usize, usize)) -> Resu
 fn valuate(model: &Model, oracle_val: f64) -> f64 {
 	// TODO: Cleanup and justify
 	let oracle_val = oracle_val.powf(4.0);
-	let qbit_val = (model.qbits as f64 / 64.0).powf(2.0);
-	let gate_val = (model.gates.len() as f64 / 128.0).powf(2.0);
+	let qbit_val = (model.qbits as f64 / 16.0).powf(4.0);
+	let gate_val = (model.gates.len() as f64 / 64.0).powf(4.0);
 	oracle_val - (qbit_val + gate_val)
 }
