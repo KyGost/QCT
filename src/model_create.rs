@@ -11,6 +11,8 @@ use q1tsim::error::Result;
 use rayon::prelude::*;
 
 pub(crate) fn make_many_models(number: u64) -> Result<()> {
+	setup_inputs();
+
 	let progress = ProgressBar::new(number)
 		.with_style(
 			indicatif::ProgressStyle::default_bar()
@@ -102,15 +104,18 @@ fn default_model_manipulator(model: &Model) -> Vec<Model> {
 }
 
 static mut INPUTS: Vec<Vec<u64>> = vec![];
-
-fn input_supplier(iters: u8) -> Vec<Vec<u64>> {
+fn setup_inputs() {
 	unsafe {
-		if iters > (INPUTS.len() as u8) {
+		for _ in 0..10 {
+			// TODO: Add config
 			INPUTS.push(vec![
 				fastrand::usize(0..ACCURACY / 2) as u64,
 				fastrand::usize(0..ACCURACY / 2) as u64,
 			]);
 		}
 	}
+}
+
+fn input_supplier(iters: u8) -> Vec<Vec<u64>> {
 	unsafe { INPUTS.clone() }
 }

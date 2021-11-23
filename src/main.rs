@@ -30,7 +30,7 @@ mod valuate;
 
 const SHOTS: usize = 2000;
 const ACCURACY: usize = 200;
-const ITERS: u8 = 20;
+const ITERS: u8 = 10;
 
 // TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
