@@ -15,8 +15,64 @@ fn increase_qbits(mut model: Model) -> Model {
 	model
 }
 fn decrease_qbits(mut model: Model) -> Model {
-	if model.qbits > 1 {
-		//model.qbits -= 1; TODO: Remove qubit and remove any gates with it
+	if model.qbits > 3
+	/* TODO: Config */
+	{
+		let remove = fastrand::usize(..model.qbits);
+		model.gates = model
+			.gates
+			.into_iter()
+			.filter_map(|gate| {
+				use Gate::*;
+				match gate {
+					// TODO: Clean up somehow
+					NoOP() => None, // not technically relevant but might as well.
+					Measure(q, c) => {
+						if q == remove {
+							None
+						} else {
+							Some(Measure(if q > remove { q - 1 } else { q }, c))
+						}
+					}
+					U(p1, p2, p3, q) => {
+						if q == remove {
+							None
+						} else {
+							Some(U(p1, p2, p3, if q > remove { q - 1 } else { q }))
+						}
+					}
+					X(q) => {
+						if q == remove {
+							None
+						} else {
+							Some(X(if q > remove { q - 1 } else { q }))
+						}
+					}
+					CX(q1, q2) => {
+						if q1 == remove || q2 == remove {
+							None
+						} else {
+							Some(CX(
+								if q1 > remove { q1 - 1 } else { q1 },
+								if q2 > remove { q2 - 1 } else { q2 },
+							))
+						}
+					}
+					CCX(q1, q2, q3) => {
+						if q1 == remove || q2 == remove || q3 == remove {
+							None
+						} else {
+							Some(CCX(
+								if q1 > remove { q1 - 1 } else { q1 },
+								if q2 > remove { q2 - 1 } else { q2 },
+								if q3 > remove { q3 - 1 } else { q3 },
+							))
+						}
+					}
+				}
+			})
+			.collect();
+		model.qbits -= 1;
 	}
 	model
 }
