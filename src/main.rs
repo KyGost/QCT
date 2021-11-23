@@ -4,6 +4,12 @@ pub(crate) use crate::{
 	train::*,
 	util::*,
 };
+use dialoguer::{
+	theme::ColorfulTheme,
+	Input,
+	Select,
+};
+use indicatif::ProgressBar;
 use q1tsim::error::Result;
 use std::f64::consts::PI;
 
@@ -13,13 +19,28 @@ mod oracles;
 mod train;
 mod util;
 
-const SHOTS: usize = 1000;
-const ACCURACY: usize = 100;
+const SHOTS: usize = 2000;
+const ACCURACY: usize = 200;
 
 // TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
-	make_many_models(10000);
-	Ok(())
+	match Select::with_theme(&ColorfulTheme::default())
+		.items(&["Create", "Refine", "Test"])
+		.default(2)
+		.interact()
+		.unwrap()
+	{
+		0 => make_many_models(
+			Input::new()
+				.with_prompt("Iterations")
+				.default(1000)
+				.interact()
+				.unwrap(),
+		),
+		1 => Ok(()),
+		2 => test_model(),
+		_ => panic!(),
+	}
 }
 
 fn test_model() -> Result<()> {
@@ -49,15 +70,26 @@ fn test_model() -> Result<()> {
 	Ok(())
 }
 
-fn make_many_models(number: i64) -> Result<()> {
+fn make_many_models(number: u64) -> Result<()> {
+	let progress = ProgressBar::new(number)
+		.with_style(
+			indicatif::ProgressStyle::default_bar()
+				.template(
+					"[{elapsed_precise}][{per_sec}] {bar:50.cyan/blue} {pos:>7}/{len:7} {msg}",
+				)
+				.progress_chars("##-"),
+		)
+		.with_message("Making models");
+	progress.set_draw_rate(1);
+
 	let mut iters = 0;
+	let mut models = vec![];
 	while iters < number {
 		iters += 1;
-		if iters % (number / 20) == 0 {
-			println!("Working on model {}", iters);
-		}
-		make_model()?;
+		models.push(make_model()?);
+		progress.inc(1);
 	}
+	progress.finish();
 	Ok(())
 }
 
