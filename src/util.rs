@@ -21,10 +21,10 @@ pub(crate) fn get_bit_frequencies(
 		.collect()
 }
 
-pub(crate) fn get_ints_from_frequencies(freqs: Vec<f64>, accuracy_factor: usize) -> Vec<i64> {
+pub(crate) fn get_ints_from_frequencies(freqs: Vec<f64>, accuracy_factor: usize) -> Vec<u64> {
 	freqs
 		.into_iter()
-		.map(|freq| (freq * accuracy_factor as f64) as i64)
+		.map(|freq| (freq * accuracy_factor as f64) as u64)
 		.collect()
 }
 

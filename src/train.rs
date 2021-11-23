@@ -26,14 +26,14 @@ pub(crate) fn train<Oracle, InputGiver, ModelManipulator>(
 	max_iters: u8,
 ) -> Result<(Model, Value)>
 where
-	Oracle: Fn(&[i64], &[i64]) -> f64 + Sync,
-	InputGiver: Fn() -> Vec<Vec<i64>>,
+	Oracle: Fn(&[u64], &[u64]) -> f64 + Sync,
+	InputGiver: Fn(u8) -> Vec<Vec<u64>>,
 	ModelManipulator: Fn(&Model) -> Vec<Model>,
 {
 	let (prev_best, rolling_avg, iters) = prev_stats;
 
 	let models = model_manipulator(model);
-	let inputs = input_giver();
+	let inputs = input_giver(iters);
 
 	let (best_model, best_val) = models
 		.into_par_iter()
@@ -78,7 +78,7 @@ where
 	}
 }
 
-pub(crate) fn run(model: &Model, inputs: &[i64], consts: (usize, usize)) -> Result<Vec<i64>> {
+pub(crate) fn run(model: &Model, inputs: &[u64], consts: (usize, usize)) -> Result<Vec<u64>> {
 	let (shots, accuracy) = consts;
 	let input_len = inputs.len();
 
