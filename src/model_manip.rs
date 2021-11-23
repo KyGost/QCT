@@ -5,12 +5,13 @@ use std::cmp::{
 };
 
 pub(crate) fn action_upon_model(model: Model) -> Model {
-	match fastrand::usize(..5) {
+	match fastrand::usize(..6) {
 		0 => increase_qbits(model),
 		1 => decrease_qbits(model),
 		2 => add_gate(model),
 		3 => change_gate(model),
 		4 => remove_gate(model),
+		5 => model, // NOOP
 		_ => panic!(),
 	}
 }
@@ -19,7 +20,7 @@ fn increase_qbits(mut model: Model) -> Model {
 	model
 }
 fn decrease_qbits(mut model: Model) -> Model {
-	if model.qbits > 3
+	if model.qbits > (INPUT_CNT + OUTPUT_CNT)
 	/* TODO: Config */
 	{
 		let remove = fastrand::usize(..model.qbits);

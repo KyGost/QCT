@@ -3,8 +3,12 @@ use q1tsim::{
 	error::Result,
 	gates,
 };
+use serde::{
+	Deserialize,
+	Serialize,
+};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Model {
 	pub gates: Vec<Gate>,
 	pub qbits: usize,
@@ -12,7 +16,7 @@ pub struct Model {
 	pub measure_at_end: Vec<(usize, usize)>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Gate {
 	NoOP(),
 	Measure(usize, usize),

@@ -1,4 +1,5 @@
 use crate::*;
+use bincode::Options;
 use csv::Writer;
 use dialoguer::{
 	theme::ColorfulTheme,
@@ -11,8 +12,6 @@ use q1tsim::error::Result;
 use rayon::prelude::*;
 
 pub(crate) fn make_many_models(number: u64) -> Result<()> {
-	setup_inputs();
-
 	let progress = ProgressBar::new(number)
 		.with_style(
 			indicatif::ProgressStyle::default_bar()
@@ -48,6 +47,7 @@ pub(crate) fn make_many_models(number: u64) -> Result<()> {
 		.interact()
 		.unwrap()
 	{
+		let bincoder = bincode::DefaultOptions::new();
 		let name = Input::with_theme(&ColorfulTheme::default())
 			.with_prompt(String::from("Name"))
 			.default(String::from("output"))
@@ -59,6 +59,7 @@ pub(crate) fn make_many_models(number: u64) -> Result<()> {
 				.write_record(&[
 					format!("{}", val.overall),
 					format!("{}", val.oracle),
+					format!("{}", base64::encode(bincoder.serialize(&model).unwrap())),
 					format!("{:?}", model),
 				])
 				.unwrap();
@@ -71,10 +72,10 @@ pub(crate) fn make_many_models(number: u64) -> Result<()> {
 
 fn make_model() -> Result<(Value, Model)> {
 	let model = Model {
-		qbits: 3,
-		cbits: 1,
+		qbits: INPUT_CNT + OUTPUT_CNT,
+		cbits: OUTPUT_CNT,
 		gates: vec![],
-		measure_at_end: vec![(2, 0)],
+		measure_at_end: vec![(INPUT_CNT, 0)],
 	};
 
 	let (model, val) = train(
@@ -91,7 +92,8 @@ fn make_model() -> Result<(Value, Model)> {
 
 fn default_model_manipulator(model: &Model) -> Vec<Model> {
 	vec![
-		model.clone(),
+		action_upon_model(model.clone()),
+		action_upon_model(model.clone()),
 		action_upon_model(model.clone()),
 		action_upon_model(action_upon_model(model.clone())),
 		action_upon_model(action_upon_model(model.clone())),
@@ -103,18 +105,7 @@ fn default_model_manipulator(model: &Model) -> Vec<Model> {
 	]
 }
 
-static mut INPUTS: Vec<Vec<u64>> = vec![];
-fn setup_inputs() {
-	unsafe {
-		for _ in 0..10 {
-			// TODO: Add config
-			INPUTS.push(vec![
-				fastrand::usize(0..ACCURACY / 2) as u64,
-				fastrand::usize(0..ACCURACY / 2) as u64,
-			]);
-		}
-	}
-}
+pub static mut INPUTS: Vec<Vec<u64>> = vec![];
 
 fn input_supplier(iters: u8) -> Vec<Vec<u64>> {
 	unsafe { INPUTS.clone() }

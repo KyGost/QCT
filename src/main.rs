@@ -1,6 +1,7 @@
 pub(crate) use crate::{
 	model::*,
 	model_manip::*,
+	oracles::*,
 	train::*,
 	util::*,
 	valuate::*,
@@ -28,25 +29,30 @@ mod train;
 mod util;
 mod valuate;
 
-const SHOTS: usize = 2000;
 const ACCURACY: usize = 200;
-const ITERS: u8 = 10;
+const SHOTS: usize = ACCURACY * 10;
+const ITERS: u8 = 40;
+const INPUT_CNT: usize = 4;
+const OUTPUT_CNT: usize = 1;
 
 // TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
 	match Select::with_theme(&ColorfulTheme::default())
 		.items(&["Create", "Refine", "Test"])
-		.default(2)
+		.default(0)
 		.interact()
 		.unwrap()
 	{
-		0 => make_many_models(
-			Input::with_theme(&ColorfulTheme::default())
-				.with_prompt("Iterations")
-				.default(1000)
-				.interact()
-				.unwrap(),
-		),
+		0 => {
+			sum_setup_inputs();
+			make_many_models(
+				Input::with_theme(&ColorfulTheme::default())
+					.with_prompt("Iterations")
+					.default(1000)
+					.interact()
+					.unwrap(),
+			)
+		}
 		1 => Ok(()),
 		2 => test_model(),
 		_ => panic!(),
