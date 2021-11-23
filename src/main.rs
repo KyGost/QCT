@@ -4,14 +4,20 @@ pub(crate) use crate::{
 	train::*,
 	util::*,
 };
+use csv::Writer;
 use dialoguer::{
 	theme::ColorfulTheme,
+	Confirm,
 	Input,
 	Select,
 };
 use indicatif::ProgressBar;
 use q1tsim::error::Result;
-use std::f64::consts::PI;
+use rayon::prelude::*;
+use std::{
+	error::Error,
+	f64::consts::PI,
+};
 
 mod model;
 mod model_manip;
@@ -31,7 +37,7 @@ fn main() -> Result<()> {
 		.unwrap()
 	{
 		0 => make_many_models(
-			Input::new()
+			Input::with_theme(&ColorfulTheme::default())
 				.with_prompt("Iterations")
 				.default(1000)
 				.interact()
@@ -90,10 +96,40 @@ fn make_many_models(number: u64) -> Result<()> {
 		progress.inc(1);
 	}
 	progress.finish();
+	models.par_sort_unstable_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
+	let mut top_vals = models.clone();
+	top_vals.truncate(5);
+	let top_vals = top_vals
+		.into_iter()
+		.map(|(val, _)| val)
+		.collect::<Vec<f64>>();
+
+	println!("{:?}", top_vals);
+
+	if Confirm::with_theme(&ColorfulTheme::default())
+		.with_prompt("Save Results")
+		.default(true)
+		.interact()
+		.unwrap()
+	{
+		let name = Input::with_theme(&ColorfulTheme::default())
+			.with_prompt(String::from("Name"))
+			.default(String::from("output"))
+			.interact()
+			.unwrap();
+		let mut writer = Writer::from_path(format!("output/{}.csv", name)).unwrap();
+		models.into_iter().for_each(|(val, model)| {
+			writer
+				.write_record(&[format!("{}", val), format!("{:?}", model)])
+				.unwrap();
+		});
+		writer.flush().unwrap();
+	}
+
 	Ok(())
 }
 
-fn make_model() -> Result<()> {
+fn make_model() -> Result<(f64, Model)> {
 	let model = Model {
 		qbits: 3,
 		cbits: 1,
@@ -120,10 +156,7 @@ fn make_model() -> Result<()> {
 		(0.0, 0.5),
 		(SHOTS, ACCURACY),
 	)?;
-	if val > 0.5 {
-		println!("Produced {} model: {:?}", val, model); // TODO: Give a list of best few
-	}
-	Ok(())
+	Ok((val, model))
 }
 
 fn default_model_manipulator(model: &Model) -> Vec<Model> {
