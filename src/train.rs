@@ -4,6 +4,7 @@ use crate::{
 	get_ints_from_frequencies,
 	GatedCircuit,
 	Model,
+	Value,
 };
 use q1tsim::{
 	circuit::Circuit,
@@ -20,15 +21,16 @@ pub(crate) fn train<Oracle, InputGiver, ModelManipulator>(
 	input_giver: InputGiver,
 	model_manipulator: ModelManipulator,
 	model: &Model,
-	prev_stats: (f64, f64),
+	prev_stats: (Value, f64, u8),
 	consts: (usize, usize),
-) -> Result<(Model, f64)>
+	max_iters: u8,
+) -> Result<(Model, Value)>
 where
 	Oracle: Fn(&[i64], &[i64]) -> f64 + Sync,
 	InputGiver: Fn() -> Vec<Vec<i64>>,
 	ModelManipulator: Fn(&Model) -> Vec<Model>,
 {
-	let (prev_best, rolling_avg) = prev_stats;
+	let (prev_best, rolling_avg, iters) = prev_stats;
 
 	let models = model_manipulator(model);
 	let inputs = input_giver();
@@ -48,19 +50,20 @@ where
 				.fold(0.0, |sum, value| sum + value)
 				/ (inputs.len() as f64);
 
-			let val = valuate(&model, oracle_val); // Value consists of oracle score weighted against number of qubits and number of gates
+			let val = Value::new(oracle_val, model.qbits, model.gates.len()); // Value consists of oracle score weighted against number of qubits and number of gates
 			Ok((model, val))
 		})
-		.collect::<Result<Vec<(Model, f64)>>>()?
+		.collect::<Result<Vec<(Model, Value)>>>()?
 		.into_iter()
-		.max_by_key(|(model, value)| (value * 1000.0) as i64)
-		.unwrap_or((model.clone(), 0.0));
+		.max_by_key(|(model, value)| (value.overall * 1000.0) as i64)
+		.unwrap();
 
-	//println!("{:?}: {:?}", best_val, best_model);
-
-	let change = best_val - prev_best;
+	let change = best_val.overall - prev_best.overall;
 	let rolling_avg = (rolling_avg + change) / 2.0;
-	if rolling_avg < -0.03 || best_val > 0.6 {
+	if iters > max_iters
+		|| ((iters > 5 && best_val.overall < 0.2) || (iters > 3 && best_val.overall < 0.1)/*abort*/)
+	// TODO: Config
+	{
 		Ok((best_model, best_val))
 	} else {
 		train(
@@ -68,8 +71,9 @@ where
 			input_giver,
 			model_manipulator,
 			&best_model,
-			(best_val, rolling_avg),
+			(best_val, rolling_avg, iters + 1),
 			consts,
+			max_iters,
 		)
 	}
 }
@@ -97,12 +101,4 @@ pub(crate) fn run(model: &Model, inputs: &[i64], consts: (usize, usize)) -> Resu
 	let freqs: Vec<f64> = get_bit_frequencies(result, input_len, shots);
 
 	Ok(get_ints_from_frequencies(freqs, accuracy))
-}
-
-fn valuate(model: &Model, oracle_val: f64) -> f64 {
-	// TODO: Cleanup and justify
-	let oracle_val = oracle_val.powf(4.0);
-	let qbit_val = (model.qbits as f64 / 12.0).powf(4.0);
-	let gate_val = (model.gates.len() as f64 / 128.0).powf(4.0);
-	oracle_val - (qbit_val + gate_val)
 }

@@ -3,6 +3,7 @@ pub(crate) use crate::{
 	model_manip::*,
 	train::*,
 	util::*,
+	valuate::*,
 };
 use csv::Writer;
 use dialoguer::{
@@ -14,19 +15,18 @@ use dialoguer::{
 use indicatif::ProgressBar;
 use q1tsim::error::Result;
 use rayon::prelude::*;
-use std::{
-	error::Error,
-	f64::consts::PI,
-};
+use std::f64::consts::PI;
 
 mod model;
 mod model_manip;
 mod oracles;
 mod train;
 mod util;
+mod valuate;
 
 const SHOTS: usize = 2000;
 const ACCURACY: usize = 200;
+const ITERS: u8 = 10;
 
 // TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
@@ -96,12 +96,12 @@ fn make_many_models(number: u64) -> Result<()> {
 		progress.inc(1);
 	}
 	progress.finish();
-	models.par_sort_unstable_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
+	models.par_sort_unstable_by(|a, b| b.0.overall.partial_cmp(&a.0.overall).unwrap());
 	let mut top_vals = models.clone();
 	top_vals.truncate(5);
 	let top_vals = top_vals
 		.into_iter()
-		.map(|(val, _)| val)
+		.map(|(val, _)| val.overall)
 		.collect::<Vec<f64>>();
 
 	println!("{:?}", top_vals);
@@ -120,7 +120,11 @@ fn make_many_models(number: u64) -> Result<()> {
 		let mut writer = Writer::from_path(format!("output/{}.csv", name)).unwrap();
 		models.into_iter().for_each(|(val, model)| {
 			writer
-				.write_record(&[format!("{}", val), format!("{:?}", model)])
+				.write_record(&[
+					format!("{}", val.overall),
+					format!("{}", val.oracle),
+					format!("{:?}", model),
+				])
 				.unwrap();
 		});
 		writer.flush().unwrap();
@@ -129,7 +133,7 @@ fn make_many_models(number: u64) -> Result<()> {
 	Ok(())
 }
 
-fn make_model() -> Result<(f64, Model)> {
+fn make_model() -> Result<(Value, Model)> {
 	let model = Model {
 		qbits: 3,
 		cbits: 1,
@@ -149,20 +153,19 @@ fn make_model() -> Result<(f64, Model)> {
 	};
 
 	let (model, val) = train(
-		oracles::multiply_evaluator,
+		oracles::sum_evaluator,
 		input_supplier,
 		default_model_manipulator,
 		&model,
-		(0.0, 0.5),
+		(Value::new(0.0, 0, 0), 0.5, 1),
 		(SHOTS, ACCURACY),
+		ITERS,
 	)?;
 	Ok((val, model))
 }
 
 fn default_model_manipulator(model: &Model) -> Vec<Model> {
 	vec![
-		model.clone(),
-		model.clone(),
 		model.clone(),
 		action_upon_model(model.clone()),
 		action_upon_model(action_upon_model(model.clone())),
