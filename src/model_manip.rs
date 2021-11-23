@@ -1,4 +1,8 @@
 use crate::*;
+use std::cmp::{
+	max,
+	min,
+};
 
 pub(crate) fn action_upon_model(model: Model) -> Model {
 	match fastrand::usize(..5) {
@@ -83,7 +87,17 @@ fn add_gate(mut model: Model) -> Model {
 fn change_gate(mut model: Model) -> Model {
 	let gate_len = model.gates.len();
 	if gate_len > 0 {
-		model.gates[fastrand::usize(..gate_len)] = rand_gate(&model); // TODO: Manipulate parameters and whatnot
+		use Gate::*;
+		model.gates[fastrand::usize(..gate_len)] =
+			match model.gates[fastrand::usize(..gate_len)].clone() {
+				U(p1, p2, p3, q) => U(
+					p1 + ((fastrand::f64() - 0.5).powf(0.6) * p1),
+					p2 + ((fastrand::f64() - 0.5).powf(0.6) * p2),
+					p3 + ((fastrand::f64() - 0.5).powf(0.6) * p3),
+					q,
+				), // Only change values with non-qubit parameters // TODO: Range config // TODO: Make this actually reasonable // No idea if this actually works reasonably at all
+				other => other,
+			}
 	}
 	model
 }
