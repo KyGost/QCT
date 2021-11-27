@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 pub(crate) fn get_bit_frequencies(
 	string_freqs: HashMap<String, usize>,
-	bits: usize,
+	_bits: usize,
 	shots: usize,
 ) -> Vec<f64> {
 	let cbits = string_freqs.iter().take(1).len(); // TODO: Clean

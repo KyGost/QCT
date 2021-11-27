@@ -1,4 +1,5 @@
 pub(crate) use crate::{
+	config::*,
 	model::*,
 	model_manip::*,
 	oracles::*,
@@ -8,17 +9,16 @@ pub(crate) use crate::{
 };
 use dialoguer::{
 	theme::ColorfulTheme,
-	Confirm,
-	Input,
 	Select,
 };
 use model_create::*;
-use model_refine::*;
+//use model_refine::*;
 use model_test::*;
 use q1tsim::error::Result;
 use rayon::prelude::*;
 use std::f64::consts::PI;
 
+mod config;
 mod model;
 mod model_create;
 mod model_manip;
@@ -29,12 +29,6 @@ mod train;
 mod util;
 mod valuate;
 
-const ACCURACY: usize = 100;
-const SHOTS: usize = ACCURACY * 10;
-const ITERS: usize = 1000;
-const INPUT_CNT: usize = 2;
-const OUTPUT_CNT: usize = 1;
-
 // TODO: Make an area for making new models and an area for refining existing
 fn main() -> Result<()> {
 	match Select::with_theme(&ColorfulTheme::default())
@@ -43,18 +37,9 @@ fn main() -> Result<()> {
 		.interact()
 		.unwrap()
 	{
-		0 => {
-			if30_setup_inputs();
-			make_many_models(
-				Input::with_theme(&ColorfulTheme::default())
-					.with_prompt("Iterations")
-					.default(1000)
-					.interact()
-					.unwrap(),
-			)
-		}
+		0 => model_create(Config::new_via_input()),
 		1 => Ok(()),
-		2 => test_model(),
+		2 => test_model(Config::new_via_input()),
 		_ => panic!(),
 	}
 }

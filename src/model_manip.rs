@@ -1,8 +1,4 @@
 use crate::*;
-use std::cmp::{
-	max,
-	min,
-};
 
 pub(crate) fn action_upon_model(model: Model) -> Model {
 	match fastrand::usize(..6) {
@@ -20,7 +16,8 @@ fn increase_qbits(mut model: Model) -> Model {
 	model
 }
 fn decrease_qbits(mut model: Model) -> Model {
-	if model.qbits > (INPUT_CNT + OUTPUT_CNT)
+	if model.qbits > 5
+	//(config.oracle.inputs + config.oracle.outputs)
 	/* TODO: Config */
 	{
 		let remove = fastrand::usize(..model.qbits);
