@@ -1,5 +1,5 @@
-const MAX_QBITS: usize = 12; // Qubits are real slow on classical
-const MAX_GATES: usize = 64;
+const MAX_QBITS: usize = 16; // Qubits are real slow on classical
+const MAX_GATES: usize = 128;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Value {
@@ -13,7 +13,8 @@ impl Value {
 	pub fn new(oracle_val: f64, qbits: usize, gates: usize) -> Self {
 		let qbit_val = qbits as f64 / MAX_QBITS as f64;
 		let gate_val = gates as f64 / MAX_GATES as f64;
-		let overall_val = oracle_val - (((qbit_val + gate_val) / 2.0).powf(2.0) * oracle_val);
+		let overall_val =
+			oracle_val - ((((qbit_val + gate_val) / 2.0).powf(2.0) * oracle_val) / 2.0);
 		Self {
 			oracle: oracle_val,
 			qbit: qbit_val,

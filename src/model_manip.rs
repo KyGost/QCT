@@ -28,10 +28,36 @@ fn decrease_qbits(mut model: Model) -> Model {
 			.gates
 			.into_iter()
 			.filter_map(|gate| {
+				use self::Func::*;
 				use Gate::*;
 				match gate {
 					// TODO: Clean up somehow
 					NoOP() => None, // not technically relevant but might as well.
+					Func(func) => match func {
+						Sum2(q1, q2, o) => {
+							if q1 == remove || q2 == remove || o == remove {
+								None
+							} else {
+								Some(Func(Sum2(
+									if q1 > remove { q1 - 1 } else { q1 },
+									if q2 > remove { q2 - 1 } else { q2 },
+									if o > remove { o - 1 } else { o },
+								)))
+							}
+						}
+						Sum3(q1, q2, q3, o) => {
+							if q1 == remove || q2 == remove || q3 == remove || o == remove {
+								None
+							} else {
+								Some(Func(Sum3(
+									if q1 > remove { q1 - 1 } else { q1 },
+									if q2 > remove { q2 - 1 } else { q2 },
+									if q3 > remove { q3 - 1 } else { q3 },
+									if o > remove { o - 1 } else { o },
+								)))
+							}
+						}
+					},
 					Measure(q, c) => {
 						if q == remove {
 							None
@@ -110,13 +136,7 @@ fn remove_gate(mut model: Model) -> Model {
 	model
 }
 fn rand_gate(model: &Model) -> Gate {
-	match fastrand::usize(..4) {
-		3 => Gate::U(
-			fastrand::f64() * PI,
-			fastrand::f64() * PI,
-			fastrand::f64() * PI,
-			fastrand::usize(..model.qbits),
-		),
+	match fastrand::usize(..5) {
 		0 => Gate::X(fastrand::usize(..model.qbits)),
 		1 => {
 			if model.qbits < 2 {
@@ -135,6 +155,34 @@ fn rand_gate(model: &Model) -> Gate {
 			let q3 = unused_qbit(model.qbits, &[q1, q2]);
 			Gate::CCX(q1, q2, q3)
 		}
+		3 => Gate::U(
+			fastrand::f64() * PI,
+			fastrand::f64() * PI,
+			fastrand::f64() * PI,
+			fastrand::usize(..model.qbits),
+		),
+		4 => match fastrand::usize(..2) {
+			0 => {
+				if model.qbits < 3 {
+					return Gate::NoOP();
+				}
+				let i1 = unused_qbit(model.qbits, &[]);
+				let i2 = unused_qbit(model.qbits, &[i1]);
+				let o = unused_qbit(model.qbits, &[i1, i2]);
+				Gate::Func(Func::Sum2(i1, i2, o))
+			}
+			1 => {
+				if model.qbits < 4 {
+					return Gate::NoOP();
+				}
+				let i1 = unused_qbit(model.qbits, &[]);
+				let i2 = unused_qbit(model.qbits, &[i1]);
+				let i3 = unused_qbit(model.qbits, &[i1, i2]);
+				let o = unused_qbit(model.qbits, &[i1, i2, i3]);
+				Gate::Func(Func::Sum3(i1, i2, i3, o))
+			}
+			_ => panic!(),
+		},
 		_ => panic!(),
 	}
 }

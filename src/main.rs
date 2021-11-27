@@ -29,10 +29,10 @@ mod train;
 mod util;
 mod valuate;
 
-const ACCURACY: usize = 200;
+const ACCURACY: usize = 100;
 const SHOTS: usize = ACCURACY * 10;
-const ITERS: u8 = 40;
-const INPUT_CNT: usize = 4;
+const ITERS: usize = 1000;
+const INPUT_CNT: usize = 2;
 const OUTPUT_CNT: usize = 1;
 
 // TODO: Make an area for making new models and an area for refining existing
@@ -44,7 +44,7 @@ fn main() -> Result<()> {
 		.unwrap()
 	{
 		0 => {
-			sum_setup_inputs();
+			if30_setup_inputs();
 			make_many_models(
 				Input::with_theme(&ColorfulTheme::default())
 					.with_prompt("Iterations")

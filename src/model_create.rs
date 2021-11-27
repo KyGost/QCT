@@ -79,7 +79,7 @@ fn make_model() -> Result<(Value, Model)> {
 	};
 
 	let (model, val) = train(
-		oracles::sum_evaluator,
+		oracles::if30_evaluator,
 		input_supplier,
 		default_model_manipulator,
 		&model,
@@ -107,6 +107,6 @@ fn default_model_manipulator(model: &Model) -> Vec<Model> {
 
 pub static mut INPUTS: Vec<Vec<u64>> = vec![];
 
-fn input_supplier(iters: u8) -> Vec<Vec<u64>> {
+fn input_supplier(_iters: usize) -> Vec<Vec<u64>> {
 	unsafe { INPUTS.clone() }
 }

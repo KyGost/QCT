@@ -21,13 +21,13 @@ pub(crate) fn train<Oracle, InputGiver, ModelManipulator>(
 	input_giver: InputGiver,
 	model_manipulator: ModelManipulator,
 	model: &Model,
-	prev_stats: (Value, f64, u8),
+	prev_stats: (Value, f64, usize),
 	consts: (usize, usize),
-	max_iters: u8,
+	max_iters: usize,
 ) -> Result<(Model, Value)>
 where
 	Oracle: Fn(&[u64], &[u64]) -> f64 + Sync,
-	InputGiver: Fn(u8) -> Vec<Vec<u64>>,
+	InputGiver: Fn(usize) -> Vec<Vec<u64>>,
 	ModelManipulator: Fn(&Model) -> Vec<Model>,
 {
 	let (prev_best, rolling_avg, iters) = prev_stats;
